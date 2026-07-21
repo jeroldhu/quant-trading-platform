@@ -1,0 +1,10 @@
+name: etf_rotation
+enabled: true
+version: "1.0.0"
+capital_weight: 0.60
+required_readiness:
+  - ROTATION_READY
+parameters:
+  top_n: 2
+  lookback_days: 20
+  max_position_weight: 0.40

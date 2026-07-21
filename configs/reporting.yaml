@@ -1,0 +1,10 @@
+ai:
+  enabled: false
+  model: deepseek-chat
+  timeout_seconds: 120
+  max_retries: 2
+  dimensions:
+    - backtest
+    - signal
+    - signal_explanation
+    - anomaly

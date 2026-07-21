@@ -1,0 +1,24 @@
+collection:
+  asset_types: [etf]
+  scope: full_market
+  exchanges: [SSE, SZSE]
+  include_delisted: true
+  adjustments: [raw, qfq]
+  datasets:
+    - etf_master
+    - etf_daily_bar
+    - index_daily
+    - trade_calendar
+  benchmarks: ["000300.SH"]
+
+history:
+  start: "2015-01-01"
+  end: latest_trade_date
+  respect_listing_date: true
+
+incremental:
+  overlap_trade_days: 5
+
+quality:
+  min_publish_coverage: 0.99
+  min_independent_sources: 2

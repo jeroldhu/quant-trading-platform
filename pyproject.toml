@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "quant-trading-platform"
+version = "0.1.0"
+description = "A 股量化研究与数据质量平台"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+dependencies = [
+    "pydantic>=2.11,<3",
+    "pydantic-settings>=2.10,<3",
+    "pyyaml>=6.0.2,<7",
+    "typer>=0.16,<1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.17,<2",
+    "ruff>=0.12,<1",
+    "types-pyyaml>=6.0.12,<7",
+]
+
+[project.scripts]
+quant = "quant_trading.cli.main:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/quant_trading"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src/quant_trading"]

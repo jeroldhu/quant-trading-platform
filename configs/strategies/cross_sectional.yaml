@@ -1,0 +1,10 @@
+name: cross_sectional
+enabled: false
+version: "1.0.0"
+capital_weight: 0.20
+required_readiness:
+  - CROSS_SECTION_READY
+  - FEATURE_READY
+parameters:
+  top_n: 5
+  max_position_weight: 0.20

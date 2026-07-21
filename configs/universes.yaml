@@ -1,0 +1,19 @@
+version: "1.0.0"
+
+benchmarks:
+  default: "000300.SH"
+
+universes:
+  etf_rotation:
+    mode: configured
+    instruments:
+      - "512480.SH"
+      - "159516.SZ"
+      - "159508.SZ"
+
+  etf_cross_sectional:
+    mode: full_market
+    filters:
+      min_listed_trade_days: 61
+      min_avg_amount_20d: 50000000
+      exclude_delisted_as_of_date: true

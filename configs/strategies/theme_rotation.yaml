@@ -1,0 +1,9 @@
+name: theme_rotation
+enabled: false
+version: "1.0.0"
+capital_weight: 0.20
+required_readiness:
+  - STOCK_BACKTEST_READY
+parameters:
+  top_n: 2
+  max_position_weight: 0.30
