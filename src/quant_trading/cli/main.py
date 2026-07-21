@@ -1,5 +1,8 @@
 """统一命令行入口与子命令装配。"""
 
+# TODO(P4-CLI-03): 装配 scheduler/report/ai/config/migrate 命令和统一错误输出。
+# Contract: docs/development-todo.md#p4-cli-03
+
 import typer
 
 from quant_trading import __version__

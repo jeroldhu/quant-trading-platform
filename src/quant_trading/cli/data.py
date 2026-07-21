@@ -1,5 +1,8 @@
 """数据管道命令。"""
 
+# TODO(P4-CLI-01): 接入全部数据、快照、状态和压缩命令及统一退出码。
+# Contract: docs/development-todo.md#p4-cli-01
+
 from pathlib import Path
 from typing import Annotated
 

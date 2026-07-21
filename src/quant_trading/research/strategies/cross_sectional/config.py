@@ -1,5 +1,8 @@
 """ETF 横截面策略参数。"""
 
+# TODO(P3-STRATEGY-03): 补齐全市场过滤、因子权重和 Top-N 参数校验。
+# Contract: docs/development-todo.md#p3-strategy-03
+
 from pydantic import BaseModel, ConfigDict, Field
 
 

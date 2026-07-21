@@ -1,5 +1,8 @@
 """跨策略复用的纯因子函数。"""
 
+# TODO(P3-RESEARCH-02): 实现文档定义的 qfq 动量、强弱、波动率和回撤因子。
+# Contract: docs/development-todo.md#p3-research-02
+
 from collections.abc import Sequence
 
 

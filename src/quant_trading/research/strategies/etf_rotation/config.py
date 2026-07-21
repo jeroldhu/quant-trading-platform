@@ -1,5 +1,8 @@
 """ETF 轮动策略参数。"""
 
+# TODO(P3-STRATEGY-01): 补齐 ETF 轮动因子、风险开关和权重参数校验。
+# Contract: docs/development-todo.md#p3-strategy-01
+
 from pydantic import BaseModel, ConfigDict, Field
 
 

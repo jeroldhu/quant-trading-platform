@@ -1,5 +1,8 @@
 """ETF 轮动策略骨架。"""
 
+# TODO(P3-STRATEGY-01): 按锁定数据实现候选过滤、评分、择时与目标权重。
+# Contract: docs/development-todo.md#p3-strategy-01
+
 from quant_trading.config import StrategyFile
 from quant_trading.models import TargetPosition
 from quant_trading.research.strategy import StrategyContext

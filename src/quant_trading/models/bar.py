@@ -1,5 +1,8 @@
 """行情领域模型。"""
 
+# TODO(P1-MODEL-01): 补齐 Gold 行情的来源、复权和质量审计字段。
+# Contract: docs/development-todo.md#p1-model-01
+
 from datetime import date
 from enum import StrEnum
 

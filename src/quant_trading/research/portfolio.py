@@ -1,5 +1,8 @@
 """多策略目标仓位合并。"""
 
+# TODO(P3-RESEARCH-05): 实现预算、集中度、现金下限、risk-off 和完整归因。
+# Contract: docs/development-todo.md#p3-research-05
+
 from collections.abc import Mapping, Sequence
 
 from quant_trading.models import TargetPosition

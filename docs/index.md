@@ -43,6 +43,7 @@
 
 | 文档 | 内容 |
 |------|------|
+| [`development-todo.md`](development-todo.md) | 后续开发任务、依赖、硬约束和验收证据 |
 | `../CLAUDE.md` | AI 编码助手：项目结构、构建命令、编码规范 |
 | `../AGENTS.md` | 仓库规范：分支策略、提交规范、代码审查 |
 | `../CHANGELOG.md` | 版本变更记录 |

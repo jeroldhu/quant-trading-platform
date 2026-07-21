@@ -1,5 +1,8 @@
 """成交审计模型。"""
 
+# TODO(P1-MODEL-04): 拆分佣金、印花税、滑点和成交金额审计字段。
+# Contract: docs/development-todo.md#p1-model-04
+
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field

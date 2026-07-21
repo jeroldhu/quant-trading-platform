@@ -1,5 +1,8 @@
 """策略信号与目标仓位模型。"""
 
+# TODO(P1-MODEL-02): 增加稳定 ID、执行日期、配置哈希和因子归因。
+# Contract: docs/development-todo.md#p1-model-02
+
 from datetime import date
 
 from pydantic import BaseModel, ConfigDict, Field

@@ -1,5 +1,8 @@
 """Point-in-time 资产池工具。"""
 
+# TODO(P3-RESEARCH-01): 实现目标日期成员解析、上市退市和流动性过滤。
+# Contract: docs/development-todo.md#p3-research-01
+
 from collections.abc import Iterable
 
 

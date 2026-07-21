@@ -3,6 +3,9 @@
 配置文件只描述参数，不在加载阶段执行采集、建库等副作用。
 """
 
+# TODO(P1-CONFIG-01): 为全部 YAML 建立严格模型并完成跨字段业务校验。
+# Contract: docs/development-todo.md#p1-config-01
+
 from pathlib import Path
 from typing import Any
 

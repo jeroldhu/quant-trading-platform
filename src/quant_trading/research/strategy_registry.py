@@ -1,5 +1,8 @@
 """策略注册、创建与配置校验。"""
 
+# TODO(P3-RESEARCH-04): 支持 enabled 策略批量创建、资金校验和版本清单。
+# Contract: docs/development-todo.md#p3-research-04
+
 from quant_trading.config import StrategyFile
 
 from .strategies import BUILTIN_STRATEGIES

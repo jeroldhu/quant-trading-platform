@@ -1,5 +1,8 @@
 """所有策略共享的最小协议。"""
 
+# TODO(P3-RESEARCH-03): 完成锁定快照的策略上下文和门禁优先运行器。
+# Contract: docs/development-todo.md#p3-research-03
+
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import date

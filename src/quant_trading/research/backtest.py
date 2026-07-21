@@ -3,6 +3,9 @@
 首期只固定不可妥协的价格边界；事件时钟、撮合和账本将在后续实现。
 """
 
+# TODO(P3-RESEARCH-06): 实现 T+1 raw 撮合、A 股约束、组合账本和绩效指标。
+# Contract: docs/development-todo.md#p3-research-06
+
 from dataclasses import dataclass
 
 from quant_trading.models import BarAdjustment

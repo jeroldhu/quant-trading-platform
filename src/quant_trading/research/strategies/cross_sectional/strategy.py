@@ -1,5 +1,8 @@
 """ETF 横截面策略骨架。"""
 
+# TODO(P3-STRATEGY-03): 实现全市场过滤、因子标准化、加权评分和目标权重。
+# Contract: docs/development-todo.md#p3-strategy-03
+
 from quant_trading.config import StrategyFile
 from quant_trading.models import TargetPosition
 from quant_trading.research.strategy import StrategyContext

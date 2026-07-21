@@ -1,5 +1,8 @@
 """策略注册和配置命令。"""
 
+# TODO(P4-CLI-02): 接入 run/backtest/replay/build-factors 和批量策略运行。
+# Contract: docs/development-todo.md#p4-cli-02
+
 from pathlib import Path
 from typing import Annotated
 

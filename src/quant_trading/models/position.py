@@ -1,5 +1,8 @@
 """持仓与组合快照模型。"""
 
+# TODO(P1-MODEL-05): 完成可用/冻结持仓、估值、现金和净值账本。
+# Contract: docs/development-todo.md#p1-model-05
+
 from datetime import date
 
 from pydantic import BaseModel, ConfigDict, Field

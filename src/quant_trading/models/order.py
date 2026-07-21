@@ -1,5 +1,8 @@
 """订单与撮合结果模型。"""
 
+# TODO(P1-MODEL-03): 完成 T+1 订单状态机、TTL 和拒绝原因约束。
+# Contract: docs/development-todo.md#p1-model-03
+
 from datetime import date, datetime
 from enum import StrEnum
 

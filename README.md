@@ -83,6 +83,7 @@ uv run quant research strategies validate
 | `docs/strategy-guide.md` | 策略增删、配置和回测指南 | ✅ |
 | `docs/ai-evaluation.md` | AI 评估配置与安全边界 | ✅ |
 | `docs/operations.md` | 部署、调度与恢复 | ✅ |
+| `docs/development-todo.md` | 分阶段开发任务、依赖和验收契约 | ✅ |
 | `CLAUDE.md` | AI 编码助手指南 | ✅ |
 | `AGENTS.md` | 仓库规范 | ✅ |
 

@@ -28,6 +28,23 @@ as one package per strategy under `research/strategies/` and exposed through an
 explicit `strategy_registry.py`; do not use filesystem scanning or import side
 effects for registration.
 
+## TODO Contract
+
+Unfinished production modules use this exact form:
+
+```python
+# TODO(P2-DATA-01): One concrete implementation outcome.
+# Contract: docs/development-todo.md#p2-data-01
+```
+
+- The ID is stable and unique: `P<phase>-<area>-<number>`.
+- The central entry defines dependencies, invariants, and acceptance evidence.
+- Do not replace a concrete TODO with vague text such as "improve later".
+- Do not delete a TODO until its acceptance evidence is produced.
+- If implementation changes the contract, update the central entry and relevant
+  architecture/data-contract documentation in the same change.
+- `__init__.py` export files do not need TODOs unless they own real behavior.
+
 ## Build, Test, and Development Commands
 
 ```bash

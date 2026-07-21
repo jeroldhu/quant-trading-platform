@@ -1,5 +1,8 @@
 """主题轮动策略骨架。"""
 
+# TODO(P3-STRATEGY-02): 实现 point-in-time 主题成员、评分和主题内选股。
+# Contract: docs/development-todo.md#p3-strategy-02
+
 from quant_trading.config import StrategyFile
 from quant_trading.models import TargetPosition
 from quant_trading.research.strategy import StrategyContext
