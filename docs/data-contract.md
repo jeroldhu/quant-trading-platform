@@ -112,7 +112,7 @@ Gold 阶段：  = 去掉 source_id/raw_hash，+ source_count, source_map, qualit
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `data_version` | str | 数据版本标识（通常为生成此版本的 `run_id`） |
+| `data_version` | str | 逻辑发布版本；由命令、日期和 Raw 哈希共同确定 |
 | `published_at` | datetime | 首次发布时间（Asia/Shanghai） |
 | `schema_version` | str | 写入时的 schema 版本号 |
 
@@ -129,7 +129,12 @@ Gold 阶段：  = 去掉 source_id/raw_hash，+ source_count, source_map, qualit
 | 官方裁决 | 交易所/基金公司正式数据到达 | 保留 | `official-<date>` |
 | 重新发布 | 校验规则升级后重跑历史 | 保留 | `revalidate-<run_id>` |
 
-#### 2.4.3 默认查询规则
+#### 2.4.3 逻辑版本谱系与查询规则
+
+增量发布不会复制未变化的完整 Gold。`data_version_lineage` 保存
+`data_version → parent_data_version`，读取时从子版本向父版本展开，并按业务键让
+子版本覆盖父版本。返回对象中的 `data_version` 统一改写为调用方锁定的逻辑版本；
+底层物理来源仍可通过谱系审计。
 
 ```sql
 -- 默认视图只返回每个业务主键的最新版本
@@ -140,20 +145,22 @@ FROM gold_etf_daily_bar
 ORDER BY instrument_id, trade_date, adjustment, published_at DESC;
 ```
 
-明确需要历史版本时，查询方指定 `data_version`：
+DuckDB 默认视图只适合运维查看最新物理记录。正式研究必须调用存储接口并指定
+逻辑 `data_version`，不能用下面这种 SQL 等值过滤代替谱系解析：
 
 ```sql
-SELECT * FROM gold_etf_daily_bar
-WHERE data_version = 'daily-20260721T080000-a1b2c3d4';
+-- 错误：增量版本只包含本次变化，并非完整逻辑快照
+SELECT * FROM gold_etf_daily_bar WHERE data_version = '<VERSION>';
 ```
 
 #### 2.4.4 回放流程
 
 ```python
 # 按 data_version 完整回放某个时点的数据
-bars = get_gold_bars(
+bars = store.get_bars(
     instruments=ROTATION_CANDIDATES,
-    start="2026-01-01", end="2026-07-21",
+    start=date(2026, 1, 1), end=date(2026, 7, 21),
+    adjustment=BarAdjustment.QFQ,
     data_version="daily-20260721T080000-a1b2c3d4",  # 锁定版本
 )
 ```
@@ -260,7 +267,7 @@ quant data backfill --instruments 159875.SZ,516160.SH \
 | `turnover_rate` | float | 换手率（%），部分源可能缺失 |
 | `trading_status` | str | `NORMAL`/`SUSPENDED`/`LIMIT_UP`/`LIMIT_DOWN` |
 | `adjustment` | str | 复权类型：`raw`/`qfq` |
-| `adjustment_source` | str | 复权因子来源，如 `tdx_factor`/`tencent_qfq` |
+| `adjustment_source` | str | 复权序列来源，如 `eastmoney`/`tencent`/`ths` |
 | `adjustment_date` | date | 复权截止日 |
 | `adjustment_version` | str | 复权因子版本哈希 |
 
@@ -286,7 +293,7 @@ quant data backfill --instruments 159875.SZ,516160.SH \
 | 成交额双源对账 | `abs(amt_a - amt_b) / max(amt_a, amt_b) <= 0.03` | 标记 `amount_single_source` |
 | 价格范围 | `low <= open/close/high` 且全部 > 0 | 隔离 |
 | 非负检查 | 量、额 >= 0 | 隔离 |
-| 前复权交叉验证 | 腾讯/同花顺前复权 vs 通达信未复权×除权因子 | 不一致则隔离 |
+| 前复权交叉验证 | 东方财富/腾讯/同花顺的 qfq 序列 | 不一致则隔离 |
 
 **来源独立性判定：**
 同一底层域名/接口包装的不同适配器算一个来源。例如 AKShare(东方财富) 和 EastmoneySource
@@ -421,12 +428,16 @@ WHERE is_current = true AND delisting_date IS NULL;
 | `snapshot_date` | date | 快照日期 |
 | `board_type` | str | 板块类型：`concept`/`industry` |
 | `board_name` | str | 板块名称 |
-| `ts_code` | str | 股票代码 |
+| `instrument_id` | str | 规范化股票代码（如 `000001.SZ`） |
 | `source_id` | str | 来源 |
+| `source_file_sha256` | str | 导入文件哈希 |
+| `data_version` | str | 所属逻辑数据版本 |
 
-**主键：** `(snapshot_date, board_type, board_name, ts_code)`
+**主键：** `(snapshot_date, board_type, board_name, instrument_id, data_version)`
 
 **注意：** AKShare 板块排行没有历史参数。旧周缺少已落库快照时，不使用当前成分伪造历史 Top 5。
+使用 `quant data sector-import` 导入实际观察日快照；`snapshot_date` 表示真实采集或
+上游正式发布日期，不允许为了跑历史而回填成更早日期。
 
 ---
 
@@ -521,6 +532,11 @@ WHERE is_current = true AND delisting_date IS NULL;
 | `stk_limit` 接口可用 | 可获取涨跌停价 | 阻塞 |
 | `suspend_d` 接口可用 | 可获取停复牌状态 | 阻塞 |
 | `stock_st` 接口可用 | 可获取 ST 标记 | 阻塞 |
+| 主题快照内股票 raw/qfq 历史 | 每只至少 61 个交易日 | 阻塞 |
+
+停牌日没有上游 daily K 线时，由 Tushare `suspend_d` 官方记录生成零成交状态行，
+沿用停牌前收盘价仅用于估值并标记 `official_suspension_single_source`；撮合必须按
+`SUSPENDED` 拒绝，不能把该价格当成可成交报价。
 
 ### 4.5 策略声明所需门禁
 
@@ -587,7 +603,7 @@ sources:
   ths:
     required: true          # 成交额依赖同花顺，ROTATION_READY 需要
   tdx:
-    required: true          # 前复权因子依赖通达信
+    required: true          # raw 独立校验源，不声明 qfq 能力
   baostock:
     required: false
     max_stale_days: 7
@@ -758,30 +774,21 @@ version: "weekly-rotation-v2.1.0"  # v2.0.0 → v2.1.0: 新增 CPO 候选 ETF
 
 ```python
 # src/quant_trading/data/providers.py
-from quant_trading.data.providers import BarSource
+class NewProvider(HttpProvider):
+    source_id = "new_provider"
+    upstream_domain = "api.newprovider.com"
+    supports_adjustments = (BarAdjustment.RAW,)
 
-class NewProviderSource(BarSource):
-    source_id: str = "new_provider_kline_raw"       # 全局唯一
-    upstream_domain: str = "api.newprovider.com"     # 用于来源独立性判定
-    supports_adjustments: tuple[str, ...] = ("raw",) # 支持的复权类型
-    rate_limit_rps: float = 1.0                      # 每秒请求数
-
-    def fetch_history(self, instrument_id, start, end, **kwargs):
+    def fetch_daily_bars(self, instruments, start, end, adjustment):
+        # 每个 HTTP 响应均返回 FetchResult；解析失败也要保留 content/raw_hash。
         ...
 ```
 
 ### 7.2 来源独立性判定
 
-在 `validation.py` 中注册来源分组：
+独立性不依赖静态映射表，而使用每条记录的 `upstream_domain` 去重。东方财富的
+直接 API 与 AKShare 的东方财富包装仍只算一个来源。通达信当前只发布 raw；它的
+旧除权接口不能完整表达分红、送转和配股，因此不得声称支持 qfq。qfq 共识来自
+东方财富、腾讯和同花顺等确实返回前复权序列的独立上游。
 
-```python
-SOURCE_UPSTREAM_GROUPS = {
-    "eastmoney": ["eastmoney_kline_raw", "eastmoney_kline_qfq", "akshare_eastmoney"],
-    "tencent": ["tencent_kline_raw", "tencent_kline_qfq"],
-    "ths": ["ths_kline_qfq"],
-    "tdx": ["tdx_kline_raw", "tdx_kline_qfq"],
-    "baostock": ["baostock_kline_raw"],
-}
-```
-
-双源对账时，同一 `upstream_group` 的多个 source_id 合并为 1 个独立来源。
+双源对账时，相同 `upstream_domain` 的多个 source_id 合并为 1 个独立来源。

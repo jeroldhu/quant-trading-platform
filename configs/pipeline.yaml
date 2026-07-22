@@ -10,6 +10,7 @@ collection:
     - index_daily
     - trade_calendar
   benchmarks: ["000300.SH"]
+  configured_instruments: []
 
 history:
   start: "2015-01-01"
@@ -22,3 +23,30 @@ incremental:
 quality:
   min_publish_coverage: 0.99
   min_independent_sources: 2
+
+sources:
+  eastmoney:
+    enabled: true
+    required: true
+  tencent:
+    enabled: true
+    required: false
+    fallback_ttl_hours: 24
+  ths:
+    enabled: true
+    required: true
+  tdx:
+    enabled: true
+    required: true
+  baostock:
+    enabled: false
+    required: false
+    max_stale_days: 7
+  tushare:
+    enabled: false
+    required: false
+    note: "增强源，仅用于股票信息补充"
+  akshare:
+    enabled: false
+    required: false
+    note: "板块发现源，不影响 ETF 门禁"

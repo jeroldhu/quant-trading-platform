@@ -208,7 +208,7 @@ cli → reporting → research → data → models
 | 东方财富 | ETF 全市场快照、历史日线、净值 | 主源(行情)、单源(净值→PROVISIONAL) |
 | 腾讯 | 历史日线(未复权+前复权)、5分钟线 | 校验源 |
 | 同花顺 | 历史日线(前复权)、成交额 | 校验源(成交额交叉验证) |
-| 通达信 | 未复权日线、除权因子、5分钟线 | 校验源(前复权因子) |
+| 通达信 | 未复权日线 | raw 独立校验源；不声明 qfq 能力 |
 | Tushare | 股票基础信息、日历、日线、复权因子 | 可选增强源 |
 | AKShare | 板块资金流向、龙虎榜 | 板块发现源 |
 
@@ -348,10 +348,9 @@ class Strategy(Protocol):
 
 | 策略 | name | frequency | 说明 |
 |------|------|-----------|------|
-| 主题轮动(个股) | `theme-stock-v1` | `weekly` | 四主题内选股，2 主题 × 3 只 |
-| ETF 周轮动 | `etf-weekly-v2` | `weekly` | 15 候选中选 0~2 只 |
-| ETF 横截面多因子 | `etf-cross-sectional-v1` | `weekly` | 全市场/固定池，多因子排序 |
-| 板块发现 | `sector-discovery-v1` | `weekly` | 概念/行业 Top 30 → Top 5 观察榜 |
+| 主题轮动(个股) | `theme_rotation` | `weekly` | 历史板块快照，2 主题 × 3 只 |
+| ETF 周轮动 | `etf_rotation` | `weekly` | 配置候选中选 0~2 只 |
+| ETF 横截面多因子 | `cross_sectional` | `weekly` | point-in-time 全市场多因子排序 |
 
 **显式注册表：**
 
@@ -486,7 +485,7 @@ MA20 偏离度                                       amount_ratio_5_20
 
 | 报告类型 | 格式 | 内容 |
 |----------|------|------|
-| 每日研究 | JSON / Markdown / HTML + PNG | 当日信号、持仓、因子、净值曲线 |
+| 每日研究 | JSON / Markdown / HTML | 当日信号、持仓、因子、门禁 |
 | 周频轮动 | JSON / Markdown / HTML | ETF 信号、板块观察榜、门禁审计 |
 | 回测绩效 | JSON / Markdown / HTML + CSV | 成交记录、绩效指标、权益曲线、归因 |
 | 数据质量 | JSON / Markdown | 门禁结果、冲突记录、缺失清单 |
@@ -629,22 +628,16 @@ Commands:
   scheduler logs           查看调度日志
 
   # 研究
-  research init-db         初始化本地 DuckDB
-  research sync            同步基础数据（从快照或公开源）
   research build-factors   计算因子
   research strategies list 列出显式注册的策略
   research strategies validate 校验注册表和所有策略配置
   research run             执行一个策略或所有 enabled 策略
   research backtest        回测指定策略
-  research daily-run       同步→校验→因子→信号→报告→AI 评估
-  research weekly-run      ETF 周频轮动→落库→报告→AI 评估
-  research validate        数据质量门禁检查
+  research replay          在同一快照、版本和配置上验证确定性
 
   # AI 评估
-  ai evaluate backtest     对已有回测结果运行 AI 评估
-  ai evaluate signals      对已有信号运行 AI 评估
-  ai evaluate quality      对数据质量报告运行 AI 异常解释
-  ai status                查看 API 额度、最近评估记录
+  ai evaluate              对已有 JSON 运行指定维度只读评估
+  ai status                查看本地 AI 配置状态（不产生请求）
 
   # 报告
   report daily             生成每日研究报告
@@ -683,12 +676,15 @@ quant data snapshot --profile dev
 quant data snapshot pull --remote aliyun --profile dev
 
 # 因子计算和回测
-quant research build-factors --start 2024-01-01 --end 2026-07-21
-quant research backtest --start 2024-01-01 --end 2026-07-21
+quant research build-factors --trade-date 2026-07-21 \
+  --data-version <VERSION> --instruments 512480.SH,159516.SZ
+quant research backtest --strategy etf_rotation --start 2024-01-01 \
+  --end 2026-07-21 --data-version <VERSION> --output reports/backtest.json
 
-# 每日研究
-quant research daily-run --trade-date 2026-07-21
-quant report daily --trade-date 2026-07-21
+# 生成目标与报告
+quant research run --trade-date 2026-07-21 --data-version <VERSION> \
+  --output reports/research.json
+quant report daily --input reports/research.json
 ```
 
 ---
@@ -711,7 +707,7 @@ Pydantic 模型默认值
 |------|--------|------|
 | `QUANT_DATA_ROOT` | `./data` | 数据根目录 |
 | `QUANT_SNAPSHOT_ROOT` | `./snapshots` | 快照目录 |
-| `QUANT_DATABASE_URL` | — | 远程 PostgreSQL 连接串 |
+| `QUANT_POSTGRES_DSN` | — | 远程 PostgreSQL 连接串 |
 | `QUANT_REMOTE_SSH_HOST` | `aliyun` | 快照同步 SSH 别名 |
 | `QUANT_MARKET_MODE` | `snapshot` | `snapshot`(快照) / `live`(直接采集) |
 | `QUANT_TUSHARE_TOKEN` | — | Tushare API Token |
@@ -845,13 +841,16 @@ data/
 
 | 表 | 主键 | 内容 |
 |----|------|------|
-| `etf_daily_bar` | `ts_code, trade_date` | 已验证 ETF 日线 |
-| `market_data_validation` | `signal_date, strategy_version, asset_code, data_kind, check_name` | 门禁通过审计 |
-| `weekly_rotation_score` | `signal_date, strategy_version, entity_type, entity_code` | 周频评分 |
-| `signal_daily` | `signal_date, execution_date, ts_code, strategy_version` | 信号记录 |
-| `sector_flow_snapshot` | `snapshot_date, board_type, board_name` | 板块资金快照 |
-| `sector_constituent_snapshot` | `snapshot_date, board_type, board_name, ts_code` | 板块成分快照 |
-| `dragon_tiger_daily` | `trade_date, ts_code, reason` | 龙虎榜 |
+| `quant_data_readiness` | `gate, trade_date, data_version` | 门禁通过审计 |
+| `quant_etl_run` | `run_id` | ETL 任务审计 |
+| `quant_quality_issue` | 运行与业务冲突键 | 数据质量问题 |
+| `quant_snapshot_audit` | `snapshot_id` | 快照 manifest 审计 |
+| `quant_research_run` | `run_id` | 完整研究/回测结果 JSON |
+| `quant_weekly_rotation_score` | 运行、日期、标的、策略 | 目标评分与权重 |
+| `quant_signal_daily` | `signal_id` | T 日信号与 T+1 执行日 |
+
+行情、因子与板块成分快照保留在不可变 Parquet/DuckDB 快照中；PostgreSQL 不复制
+大体量行情，主要承担跨机器共享的审计、信号和研究结果。
 
 ### 6.3 快照分发
 
@@ -931,8 +930,9 @@ services:
 quant data snapshot pull --remote aliyun --profile dev
 
 # 本地研究
-quant research daily-run --trade-date 2026-07-21
-quant research backtest --start 2024-01-01 --end 2026-07-21
+quant research run --trade-date 2026-07-21 --data-version <VERSION>
+quant research backtest --strategy etf_rotation --start 2024-01-01 \
+  --end 2026-07-21 --data-version <VERSION>
 ```
 
 ---
@@ -949,38 +949,30 @@ quant research backtest --start 2024-01-01 --end 2026-07-21
 
 ### 8.2 分阶段计划
 
-**Phase 1：最小骨架**
-- [ ] 项目骨架：`pyproject.toml`、`uv sync`、目录结构
-- [ ] 统一配置系统：Pydantic Settings + YAML
-- [ ] `models/`：按实体迁移稳定领域模型
-- [ ] 统一 CLI 骨架：Typer 命令注册
-- [ ] 日志、时区、`.env.example`
+**Phase 1：最小骨架（完成）**
+- [x] 项目骨架：`pyproject.toml`、`uv sync`、目录结构
+- [x] 统一配置系统：Pydantic Settings + YAML
+- [x] `models/`：按实体迁移稳定领域模型
+- [x] 统一 CLI：Typer 命令注册
+- [x] 时区和 `.env.example`
 
-**Phase 2：数据管道迁移**
-- [ ] `data/providers.py`：先迁移正式链路必需的数据源
-- [ ] `data/pipeline.py`：迁移采集编排器，替换 Click → Typer
-- [ ] `data/storage.py`：统一 Parquet + DuckDB 访问
-- [ ] `data/validation.py`：多源对账
-- [ ] `data/readiness.py`：门禁体系
-- [ ] `data/snapshot.py`：快照创建/拉取/校验
-- [ ] Docker 部署和定时调度
-- [ ] Ruff、mypy strict 与 CLI smoke 验证
+**Phase 2：数据管道迁移（实现完成，待生产实源验收）**
+- [x] 正式数据源、Raw 审计、分类重试和来源独立性
+- [x] Raw → Bronze → Silver → Gold 编排与逻辑版本谱系
+- [x] Parquet + DuckDB、门禁、快照和 Docker 调度
+- [x] 股票交易约束、主题成分快照和股票 Gold
+- [ ] 阿里云全市场实源、Tushare 权限与 PostgreSQL 联通验收
 
-**Phase 3：研究系统迁移**
-- [ ] `research/universe.py`：point-in-time 股票/ETF 池
-- [ ] `research/factors.py`：跨策略复用因子
-- [ ] `research/strategy.py` + `strategy_registry.py`：协议与显式注册表
-- [ ] `research/strategies/`：一策略一包迁移内置策略
-- [ ] `research/portfolio.py` + `backtest.py`：组合、撮合与回测
-- [ ] 本地 DuckDB + 远程 PostgreSQL 存储
-- [ ] 可复现的策略前后对比与 CLI smoke 验证
+**Phase 3：研究系统迁移（完成）**
+- [x] point-in-time 股票/ETF 池与公共因子
+- [x] 策略协议、显式注册表和一策略一包
+- [x] 多策略组合、T+1 raw 撮合与确定性重放
+- [x] DuckDB 只读研究与显式 PostgreSQL 结果持久化
 
-**Phase 4：AI 评估和报告收尾**
-- [ ] `reporting/reports.py`：四类报告生成
-- [ ] `reporting/ai_evaluation.py`：可选、只读的三维度 AI 解释
-- [ ] CLI 命令收尾和参数校验
-- [ ] 全量端到端测试
-- [ ] `README.md`、运维文档
+**Phase 4：AI 评估和报告（完成）**
+- [x] 四类 JSON/Markdown/HTML 报告、成交 CSV 和 SVG 净值图
+- [x] 可选、只读、白名单和限额 AI 解释
+- [x] CLI 参数校验、离线端到端 smoke 和文档
 
 **Phase 5：旧项目归档**
 - [ ] 04 和 05 的 README 添加归档说明

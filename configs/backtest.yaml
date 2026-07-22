@@ -4,5 +4,6 @@ minimum_commission: 5
 stock_sell_stamp_duty_rate: 0.0005
 slippage_rate: 0.0005
 lot_size: 100
+max_volume_participation: 0.10
 signal_price_adjustment: qfq
 execution_price_adjustment: raw

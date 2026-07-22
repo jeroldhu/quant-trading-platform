@@ -1,0 +1,55 @@
+services:
+  postgresql:
+    image: postgres:16-alpine
+    profiles: [server]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-quant_trading}
+      POSTGRES_USER: ${POSTGRES_USER:-quant}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - quant_postgresql:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+    profiles: [server]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      QUANT_DATA_ROOT: /app/data
+      QUANT_SNAPSHOT_ROOT: /app/snapshots
+    volumes:
+      - ./data:/app/data
+      - ./snapshots:/app/snapshots
+      - ./reports:/app/reports
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  cli:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+    profiles: [cli]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      QUANT_DATA_ROOT: /app/data
+      QUANT_SNAPSHOT_ROOT: /app/snapshots
+    volumes:
+      - ./data:/app/data
+      - ./snapshots:/app/snapshots
+      - ./reports:/app/reports
+    entrypoint: ["quant"]
+
+volumes:
+  quant_postgresql:

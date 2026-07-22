@@ -17,3 +17,12 @@ universes:
       min_listed_trade_days: 61
       min_avg_amount_20d: 50000000
       exclude_delisted_as_of_date: true
+
+  theme_rotation:
+    mode: theme_snapshot
+    board_types: [concept, industry]
+    # 留空表示使用快照内全部板块；也可填板块名称白名单。
+    themes: []
+    filters:
+      min_history_bars: 61
+      min_avg_amount_20d: 50000000

@@ -13,9 +13,9 @@ build/
 .venv/
 venv/
 
-# 数据（运行产物）
-data/
-snapshots/
+# 数据（仅忽略仓库根目录的运行产物，不能误伤 src/quant_trading/data）
+/data/
+/snapshots/
 
 # 报告（运行产物）
 reports/

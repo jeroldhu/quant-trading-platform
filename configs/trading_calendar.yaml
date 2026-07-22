@@ -1,0 +1,170 @@
+schema_version: "1.0.0"
+
+# 交易日历不是用行情是否出现来猜测，而是由两家交易所年度休市公告共同确认。
+# 每年新公告发布后必须先补充本文件，未覆盖年份会明确阻断正式信号。
+years:
+  # 2015-2024 的日期由历年 SSE/SZSE 年度公告整理；available_at 采用
+  # 当年 1 月 1 日这一保守可用时点，避免把公告实际发布日期记得过早。
+  2015:
+    sources:
+      - {source_id: sse_calendar_2015, exchange: SSE, upstream_domain: sse.com.cn, version: "sse-annual-calendar-2015", url: "https://www.sse.com.cn/disclosure/dealinstruc/closed/list/", available_at: "2015-01-01T00:00:00+08:00"}
+      - {source_id: szse_calendar_2015, exchange: SZSE, upstream_domain: szse.cn, version: "szse-annual-calendar-2015", url: "https://www.szse.cn/disclosure/notice/general/index.html", available_at: "2015-01-01T00:00:00+08:00"}
+    closures:
+      - {start: 2015-01-01, end: 2015-01-02, reason: 年度公告休市}
+      - {start: 2015-02-18, end: 2015-02-24, reason: 年度公告休市}
+      - {start: 2015-04-06, end: 2015-04-06, reason: 年度公告休市}
+      - {start: 2015-05-01, end: 2015-05-01, reason: 年度公告休市}
+      - {start: 2015-06-22, end: 2015-06-22, reason: 年度公告休市}
+      - {start: 2015-09-03, end: 2015-09-04, reason: 年度公告休市}
+      - {start: 2015-10-01, end: 2015-10-07, reason: 年度公告休市}
+  2016:
+    sources:
+      - {source_id: sse_calendar_2016, exchange: SSE, upstream_domain: sse.com.cn, version: "sse-annual-calendar-2016", url: "https://www.sse.com.cn/disclosure/dealinstruc/closed/list/", available_at: "2016-01-01T00:00:00+08:00"}
+      - {source_id: szse_calendar_2016, exchange: SZSE, upstream_domain: szse.cn, version: "szse-annual-calendar-2016", url: "https://www.szse.cn/disclosure/notice/general/index.html", available_at: "2016-01-01T00:00:00+08:00"}
+    closures:
+      - {start: 2016-01-01, end: 2016-01-01, reason: 年度公告休市}
+      - {start: 2016-02-08, end: 2016-02-12, reason: 年度公告休市}
+      - {start: 2016-04-04, end: 2016-04-04, reason: 年度公告休市}
+      - {start: 2016-05-02, end: 2016-05-02, reason: 年度公告休市}
+      - {start: 2016-06-09, end: 2016-06-10, reason: 年度公告休市}
+      - {start: 2016-09-15, end: 2016-09-16, reason: 年度公告休市}
+      - {start: 2016-10-03, end: 2016-10-07, reason: 年度公告休市}
+  2017:
+    sources:
+      - {source_id: sse_calendar_2017, exchange: SSE, upstream_domain: sse.com.cn, version: "sse-annual-calendar-2017", url: "https://www.sse.com.cn/disclosure/dealinstruc/closed/list/", available_at: "2017-01-01T00:00:00+08:00"}
+      - {source_id: szse_calendar_2017, exchange: SZSE, upstream_domain: szse.cn, version: "szse-annual-calendar-2017", url: "https://www.szse.cn/disclosure/notice/general/index.html", available_at: "2017-01-01T00:00:00+08:00"}
+    closures:
+      - {start: 2017-01-02, end: 2017-01-02, reason: 年度公告休市}
+      - {start: 2017-01-27, end: 2017-02-02, reason: 年度公告休市}
+      - {start: 2017-04-03, end: 2017-04-04, reason: 年度公告休市}
+      - {start: 2017-05-01, end: 2017-05-01, reason: 年度公告休市}
+      - {start: 2017-05-29, end: 2017-05-30, reason: 年度公告休市}
+      - {start: 2017-10-02, end: 2017-10-06, reason: 年度公告休市}
+  2018:
+    sources:
+      - {source_id: sse_calendar_2018, exchange: SSE, upstream_domain: sse.com.cn, version: "sse-annual-calendar-2018", url: "https://www.sse.com.cn/disclosure/dealinstruc/closed/list/", available_at: "2018-01-01T00:00:00+08:00"}
+      - {source_id: szse_calendar_2018, exchange: SZSE, upstream_domain: szse.cn, version: "szse-annual-calendar-2018", url: "https://www.szse.cn/disclosure/notice/general/index.html", available_at: "2018-01-01T00:00:00+08:00"}
+    closures:
+      - {start: 2018-01-01, end: 2018-01-01, reason: 年度公告休市}
+      - {start: 2018-02-15, end: 2018-02-21, reason: 年度公告休市}
+      - {start: 2018-04-05, end: 2018-04-06, reason: 年度公告休市}
+      - {start: 2018-04-30, end: 2018-05-01, reason: 年度公告休市}
+      - {start: 2018-06-18, end: 2018-06-18, reason: 年度公告休市}
+      - {start: 2018-09-24, end: 2018-09-24, reason: 年度公告休市}
+      - {start: 2018-10-01, end: 2018-10-05, reason: 年度公告休市}
+      - {start: 2018-12-31, end: 2018-12-31, reason: 年度公告休市}
+  2019:
+    sources:
+      - {source_id: sse_calendar_2019, exchange: SSE, upstream_domain: sse.com.cn, version: "sse-annual-calendar-2019", url: "https://www.sse.com.cn/disclosure/dealinstruc/closed/list/", available_at: "2019-01-01T00:00:00+08:00"}
+      - {source_id: szse_calendar_2019, exchange: SZSE, upstream_domain: szse.cn, version: "szse-annual-calendar-2019", url: "https://www.szse.cn/disclosure/notice/general/index.html", available_at: "2019-01-01T00:00:00+08:00"}
+    closures:
+      - {start: 2019-01-01, end: 2019-01-01, reason: 年度公告休市}
+      - {start: 2019-02-04, end: 2019-02-08, reason: 年度公告休市}
+      - {start: 2019-04-05, end: 2019-04-05, reason: 年度公告休市}
+      - {start: 2019-05-01, end: 2019-05-03, reason: 年度公告休市}
+      - {start: 2019-06-07, end: 2019-06-07, reason: 年度公告休市}
+      - {start: 2019-09-13, end: 2019-09-13, reason: 年度公告休市}
+      - {start: 2019-10-01, end: 2019-10-07, reason: 年度公告休市}
+  2020:
+    sources:
+      - {source_id: sse_calendar_2020, exchange: SSE, upstream_domain: sse.com.cn, version: "sse-annual-calendar-2020", url: "https://www.sse.com.cn/disclosure/dealinstruc/closed/list/", available_at: "2020-01-01T00:00:00+08:00"}
+      - {source_id: szse_calendar_2020, exchange: SZSE, upstream_domain: szse.cn, version: "szse-annual-calendar-2020", url: "https://www.szse.cn/disclosure/notice/general/index.html", available_at: "2020-01-01T00:00:00+08:00"}
+    closures:
+      - {start: 2020-01-01, end: 2020-01-01, reason: 年度公告休市}
+      - {start: 2020-01-24, end: 2020-01-31, reason: 年度公告休市}
+      - {start: 2020-04-06, end: 2020-04-06, reason: 年度公告休市}
+      - {start: 2020-05-01, end: 2020-05-05, reason: 年度公告休市}
+      - {start: 2020-06-25, end: 2020-06-26, reason: 年度公告休市}
+      - {start: 2020-10-01, end: 2020-10-08, reason: 年度公告休市}
+  2021:
+    sources:
+      - {source_id: sse_calendar_2021, exchange: SSE, upstream_domain: sse.com.cn, version: "sse-annual-calendar-2021", url: "https://www.sse.com.cn/disclosure/dealinstruc/closed/list/", available_at: "2021-01-01T00:00:00+08:00"}
+      - {source_id: szse_calendar_2021, exchange: SZSE, upstream_domain: szse.cn, version: "szse-annual-calendar-2021", url: "https://www.szse.cn/disclosure/notice/general/index.html", available_at: "2021-01-01T00:00:00+08:00"}
+    closures:
+      - {start: 2021-01-01, end: 2021-01-01, reason: 年度公告休市}
+      - {start: 2021-02-11, end: 2021-02-17, reason: 年度公告休市}
+      - {start: 2021-04-05, end: 2021-04-05, reason: 年度公告休市}
+      - {start: 2021-05-03, end: 2021-05-05, reason: 年度公告休市}
+      - {start: 2021-06-14, end: 2021-06-14, reason: 年度公告休市}
+      - {start: 2021-09-20, end: 2021-09-21, reason: 年度公告休市}
+      - {start: 2021-10-01, end: 2021-10-07, reason: 年度公告休市}
+  2022:
+    sources:
+      - {source_id: sse_calendar_2022, exchange: SSE, upstream_domain: sse.com.cn, version: "sse-annual-calendar-2022", url: "https://www.sse.com.cn/disclosure/dealinstruc/closed/list/", available_at: "2022-01-01T00:00:00+08:00"}
+      - {source_id: szse_calendar_2022, exchange: SZSE, upstream_domain: szse.cn, version: "szse-annual-calendar-2022", url: "https://www.szse.cn/disclosure/notice/general/index.html", available_at: "2022-01-01T00:00:00+08:00"}
+    closures:
+      - {start: 2022-01-03, end: 2022-01-03, reason: 年度公告休市}
+      - {start: 2022-01-31, end: 2022-02-04, reason: 年度公告休市}
+      - {start: 2022-04-04, end: 2022-04-05, reason: 年度公告休市}
+      - {start: 2022-05-02, end: 2022-05-04, reason: 年度公告休市}
+      - {start: 2022-06-03, end: 2022-06-03, reason: 年度公告休市}
+      - {start: 2022-09-12, end: 2022-09-12, reason: 年度公告休市}
+      - {start: 2022-10-03, end: 2022-10-07, reason: 年度公告休市}
+  2023:
+    sources:
+      - {source_id: sse_calendar_2023, exchange: SSE, upstream_domain: sse.com.cn, version: "sse-annual-calendar-2023", url: "https://www.sse.com.cn/disclosure/dealinstruc/closed/list/", available_at: "2023-01-01T00:00:00+08:00"}
+      - {source_id: szse_calendar_2023, exchange: SZSE, upstream_domain: szse.cn, version: "szse-annual-calendar-2023", url: "https://www.szse.cn/disclosure/notice/general/index.html", available_at: "2023-01-01T00:00:00+08:00"}
+    closures:
+      - {start: 2023-01-02, end: 2023-01-02, reason: 年度公告休市}
+      - {start: 2023-01-23, end: 2023-01-27, reason: 年度公告休市}
+      - {start: 2023-04-05, end: 2023-04-05, reason: 年度公告休市}
+      - {start: 2023-05-01, end: 2023-05-03, reason: 年度公告休市}
+      - {start: 2023-06-22, end: 2023-06-23, reason: 年度公告休市}
+      - {start: 2023-09-29, end: 2023-10-06, reason: 年度公告休市}
+  2024:
+    sources:
+      - {source_id: sse_calendar_2024, exchange: SSE, upstream_domain: sse.com.cn, version: "sse-annual-calendar-2024", url: "https://www.sse.com.cn/disclosure/dealinstruc/closed/list/", available_at: "2024-01-01T00:00:00+08:00"}
+      - {source_id: szse_calendar_2024, exchange: SZSE, upstream_domain: szse.cn, version: "szse-annual-calendar-2024", url: "https://www.szse.cn/disclosure/notice/general/index.html", available_at: "2024-01-01T00:00:00+08:00"}
+    closures:
+      - {start: 2024-01-01, end: 2024-01-01, reason: 年度公告休市}
+      - {start: 2024-02-09, end: 2024-02-16, reason: 年度公告休市}
+      - {start: 2024-04-04, end: 2024-04-05, reason: 年度公告休市}
+      - {start: 2024-05-01, end: 2024-05-03, reason: 年度公告休市}
+      - {start: 2024-06-10, end: 2024-06-10, reason: 年度公告休市}
+      - {start: 2024-09-16, end: 2024-09-17, reason: 年度公告休市}
+      - {start: 2024-10-01, end: 2024-10-07, reason: 年度公告休市}
+
+  2025:
+    sources:
+      - source_id: sse_calendar_2025
+        exchange: SSE
+        upstream_domain: sse.com.cn
+        version: "sse-2024-12-23-notice-38"
+        url: "https://www.sse.com.cn/disclosure/announcement/general/c/c_20241223_10767108.shtml"
+        available_at: "2024-12-23T12:00:00+08:00"
+      - source_id: szse_calendar_2025
+        exchange: SZSE
+        upstream_domain: szse.cn
+        version: "szse-2024-12-23-notice-413"
+        url: "https://investor.szse.cn/disclosure/notice/general/t20241223_611283.html"
+        available_at: "2024-12-23T12:00:00+08:00"
+    closures:
+      - {start: 2025-01-01, end: 2025-01-01, reason: 元旦}
+      - {start: 2025-01-28, end: 2025-02-04, reason: 春节}
+      - {start: 2025-04-04, end: 2025-04-06, reason: 清明节}
+      - {start: 2025-05-01, end: 2025-05-05, reason: 劳动节}
+      - {start: 2025-05-31, end: 2025-06-02, reason: 端午节}
+      - {start: 2025-10-01, end: 2025-10-08, reason: 国庆节及中秋节}
+
+  2026:
+    sources:
+      - source_id: sse_calendar_2026
+        exchange: SSE
+        upstream_domain: sse.com.cn
+        version: "sse-2025-12-22-notice-45"
+        url: "https://www.sse.com.cn/disclosure/announcement/general/c/c_20251222_10802507.shtml"
+        available_at: "2025-12-22T12:00:00+08:00"
+      - source_id: szse_calendar_2026
+        exchange: SZSE
+        upstream_domain: szse.cn
+        version: "szse-2025-12-22-notice-481"
+        url: "https://www.szse.cn/disclosure/notice/general/t20251222_618087.html"
+        available_at: "2025-12-22T12:00:00+08:00"
+    closures:
+      - {start: 2026-01-01, end: 2026-01-04, reason: 元旦}
+      - {start: 2026-02-15, end: 2026-02-23, reason: 春节}
+      - {start: 2026-04-04, end: 2026-04-06, reason: 清明节}
+      - {start: 2026-05-01, end: 2026-05-05, reason: 劳动节}
+      - {start: 2026-06-19, end: 2026-06-21, reason: 端午节}
+      - {start: 2026-09-25, end: 2026-09-27, reason: 中秋节}
+      - {start: 2026-10-01, end: 2026-10-07, reason: 国庆节}

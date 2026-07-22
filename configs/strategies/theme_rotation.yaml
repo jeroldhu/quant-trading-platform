@@ -5,5 +5,8 @@ capital_weight: 0.20
 required_readiness:
   - STOCK_BACKTEST_READY
 parameters:
-  top_n: 2
-  max_position_weight: 0.30
+  top_themes: 2
+  stocks_per_theme: 3
+  min_history_bars: 61
+  max_position_weight: 0.15
+  min_avg_amount_20d: 50000000
