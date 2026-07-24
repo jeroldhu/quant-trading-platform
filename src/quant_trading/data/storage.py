@@ -462,6 +462,9 @@ class ParquetDuckDBStore:
         *,
         dataset: str = "etf_daily_bar",
     ) -> int:
+        # Bronze 层是可变层，同一 (instrument, trade_date, adjustment, source_id)
+        # 的后续运行可以覆盖——审计链在 Raw 层（每次运行都保留原始 HTTP 响应；
+        # 见 pipeline.py._fetch → save_raw）。因此 data_version 不在 key 中。
         frame = self._source_frame(bars, data_version)
         return self._write_partitioned(
             "bronze",

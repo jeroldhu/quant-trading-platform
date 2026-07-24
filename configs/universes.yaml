@@ -1,15 +1,27 @@
 version: "1.0.0"
 
 benchmarks:
-  default: "000300.SH"
+  default: "510300.SH"
 
 universes:
   etf_rotation:
     mode: configured
     instruments:
-      - "512480.SH"
-      - "159516.SZ"
-      - "159508.SZ"
+      - "510300.SH"  # 沪深300
+      - "510500.SH"  # 中证500
+      - "512100.SH"  # 中证1000
+      - "159915.SZ"  # 创业板
+      - "588000.SH"  # 科创50
+      - "512480.SH"  # 半导体
+      - "159516.SZ"  # 通信
+      - "159508.SZ"  # 软件
+      - "562500.SH"  # 机器人
+      - "516110.SH"  # 电力设备
+      - "512660.SH"  # 军工
+      - "512880.SH"  # 证券
+      - "512400.SH"  # 有色
+      - "510880.SH"  # 红利
+      - "518880.SH"  # 黄金
 
   etf_cross_sectional:
     mode: full_market

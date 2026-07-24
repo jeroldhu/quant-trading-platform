@@ -241,9 +241,19 @@ def _build_context(
     benchmark_id = universe_config.benchmarks.get("default")
     if not benchmark_id:
         raise ConfigError("universes.benchmarks.default 未配置")
-    benchmark = store.get_index_bars(
-        benchmark_id, start, trade_date, data_version=data_version
-    )
+    # 基准可能是指数(000*.SH)或ETF(51*.SH)，按前缀路由到对应存储
+    if benchmark_id.startswith("000") or benchmark_id.startswith("399"):
+        benchmark = store.get_index_bars(
+            benchmark_id, start, trade_date, data_version=data_version
+        )
+    else:
+        benchmark = store.get_bars(
+            (benchmark_id,),
+            start,
+            trade_date,
+            adjustment=BarAdjustment.QFQ,
+            data_version=data_version,
+        )
     calendar = store.get_trade_calendar(start, trade_date, data_version=data_version)
     if readiness_override is None:
         readiness = {

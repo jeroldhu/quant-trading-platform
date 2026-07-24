@@ -1,13 +1,25 @@
 SHELL=/bin/sh
 PATH=/app/.venv/bin:/usr/local/bin:/usr/bin:/bin
 
+# ETF 轮动核心标的（与 configs/universes.yaml 中 etf_rotation.instruments 保持一致）
+ETFS="512480.SH,159516.SZ,159508.SZ"
+
 # 所有任务由 writer lock 串行保护；失败退出码保留给容器日志和监控。
-30 14 * * 1-5 root cd /app && quant data daily --trade-date today >> /app/logs/daily.log 2>&1
-20 15 * * 1-5 root cd /app && quant data daily --trade-date today >> /app/logs/daily.log 2>&1
-30 18 * * 1-5 root cd /app && quant data daily --trade-date today >> /app/logs/daily.log 2>&1
-30 19 * * 1-5 root cd /app && quant data backfill --start today --end latest >> /app/logs/backfill.log 2>&1
+# 注意：refresh-master 在 TDX 节点不可达的环境中可能失败，显式指定 instruments
+
+# 盘后采集（A 股 15:00 收盘后运行）
+20 15 * * 1-5 root cd /app && quant data daily --trade-date today --instruments "$ETFS" >> /app/logs/daily.log 2>&1
+30 18 * * 1-5 root cd /app && quant data daily --trade-date today --instruments "$ETFS" >> /app/logs/daily.log 2>&1
+
+# 回填：覆盖最近 5 天中可能遗漏的交易日，避免 start > end 崩溃
+30 19 * * 1-5 root cd /app && quant data backfill --start "$(date -d '5 days ago' +%Y-%m-%d)" --end latest --instruments "$ETFS" >> /app/logs/backfill.log 2>&1
+
+# 重算 Silver/Gold（基于已持久化的 Bronze，无网络请求）
 30 22 * * 1-5 root cd /app && quant data reconcile --trade-date today >> /app/logs/reconcile.log 2>&1
-30 7 * * 1-5 root cd /app && quant data publish --trade-date today >> /app/logs/publish.log 2>&1
+
+# 每周快照
 0 23 * * 5 root cd /app && quant data snapshot --profile dev >> /app/logs/snapshot.log 2>&1
 30 23 * * 0 root cd /app && quant data snapshot --profile full >> /app/logs/snapshot.log 2>&1
+
+# 每月压缩 Parquet 分区
 0 2 1 * * root cd /app && quant data compact >> /app/logs/compact.log 2>&1

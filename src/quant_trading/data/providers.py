@@ -253,6 +253,7 @@ class HttpProvider:
             if delay:
                 time.sleep(delay)
             self._wait_rate_limit()
+            self._last_request_at = time.monotonic()
             try:
                 response = self._session.get(
                     url,
@@ -260,7 +261,6 @@ class HttpProvider:
                     headers=dict(headers) if headers else None,
                     timeout=self._timeout,
                 )
-                self._last_request_at = time.monotonic()
                 if response.status_code == 429:
                     raise ProviderFailure(
                         FetchState.THROTTLED, self.source_id, "HTTP 429"
@@ -303,7 +303,9 @@ class EastmoneyProvider(HttpProvider):
         seen: set[str] = set()
         page = 1
         total = 1
-        while len(seen) < total:
+        # total 包含 LOF/封闭基金等非 ETF 品种，不可靠。
+        # 循环由内部 break 终止——当 parse_master 连续过滤为空时退出。
+        while True:
             params = {
                 "pn": str(page),
                 "pz": "100",
@@ -353,6 +355,10 @@ class EastmoneyProvider(HttpProvider):
                     self.source_id,
                     f"全市场分页在第 {page} 页没有推进",
                 )
+            # parse_master 只保留真实 ETF；API 返回的 total 包含 LOF/封闭基金等，
+            # 当后续页全部被 parse_master 过滤为空时，提前终止分页。
+            if not records:
+                break
             seen.update(new_ids)
             results.append(
                 FetchResult(
@@ -366,12 +372,10 @@ class EastmoneyProvider(HttpProvider):
                         "content-type", "application/json"
                     ),
                     content=response.content,
-                    state=FetchState.SUCCESS if records else FetchState.NO_DATA,
+                    state=FetchState.SUCCESS,
                     instruments=records,
                 )
             )
-            if not rows:
-                break
             page += 1
             if page > total // 100 + 3:
                 raise ProviderFailure(
@@ -740,6 +744,10 @@ class ThsProvider(HttpProvider):
         for row in rows:
             volume = _float(row[5])
             if volume is None or volume <= 0:
+                # 即使跳过该 bar，仍需更新 pre_close 链
+                # 避免下一个有效 bar 的 pre_close 指向过远的日期
+                if len(row) > 4:
+                    previous = _float(row[4])
                 continue
             open_, high, low, close = map(float, row[1:5])
             parsed.append(
@@ -1012,7 +1020,11 @@ class TdxProvider:
         for row in rows:
             trade_date = datetime.fromisoformat(str(row["datetime"])).date()
             prices = {key: float(row[key]) for key in ("open", "high", "low", "close")}
-            volume = _float(row.get("vol")) or _float(row.get("volume")) or 0.0
+            volume = _float(row.get("vol"))
+            if volume is None:
+                volume = _float(row.get("volume"))
+            if volume is None:
+                volume = 0.0
             parsed.append(
                 SourceBar(
                     instrument_id=instrument_id,

@@ -271,8 +271,8 @@ class PipelineOrchestrator:
                             )
                         )
                         failed_providers.add(provider.source_id)
-                    else:
-                        failed_providers.add(provider.source_id)
+                    # NO_DATA 是正常的（新上市 ETF、停牌等），
+                    # 不将 Provider 标记为失败
         return bars, hashes, warnings, failed_providers
 
     def _execute(
@@ -584,15 +584,24 @@ class PipelineOrchestrator:
             if not index.empty
             else pd.DataFrame(columns=["trade_date", "data_version"])
         )
-        benchmark_bars = (
-            int(
-                version_index.loc[version_index["trade_date"] <= trade_date][
-                    "trade_date"
-                ].nunique()
+        # 如果指数数据为空，尝试从 ETF Gold 数据中读取基准 ETF 的历史
+        benchmark_config = universe_config.benchmarks.get("default", "")
+        if version_index.empty and not version_gold.empty and not benchmark_config.startswith(("000", "399")):
+            benchmark_etf_bars = version_gold.loc[
+                (version_gold["instrument_id"] == benchmark_config)
+                & (version_gold["trade_date"] <= trade_date)
+            ]
+            benchmark_bars = int(benchmark_etf_bars["trade_date"].nunique())
+        else:
+            benchmark_bars = (
+                int(
+                    version_index.loc[version_index["trade_date"] <= trade_date][
+                        "trade_date"
+                    ].nunique()
+                )
+                if not version_index.empty
+                else 0
             )
-            if not version_index.empty
-            else 0
-        )
         version_calendar = (
             calendar.loc[calendar["data_version"] == data_version].copy()
             if not calendar.empty
@@ -902,15 +911,16 @@ class PipelineOrchestrator:
         )
 
     def publish(self, trade_date: date, data_version: str | None = None) -> PipelineRun:
-        """仅验证既有门禁；禁止为“发布成功”而隐式补跑采集。"""
+        """仅验证既有门禁；禁止为「发布成功」而隐式补跑采集。"""
 
         status = self.registry.get(
             ReadinessGate.DAILY_MARKET_READY, trade_date, data_version
         )
         require_readiness(status)
         run_id = self._run_id("publish", trade_date)
-        self.store.start_run(run_id, "publish", trade_date, status.data_version)
-        self.store.finish_run(run_id, "SUCCESS", f"gate={status.state.value}")
+        with self.store.writer_lock():
+            self.store.start_run(run_id, "publish", trade_date, status.data_version)
+            self.store.finish_run(run_id, "SUCCESS", f"gate={status.state.value}")
         return PipelineRun(
             run_id,
             "publish",
